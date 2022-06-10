@@ -8,6 +8,8 @@
             ID : {{ $user->id }}
             <br>
             EMAIL : {{ $user->email }}
+            <br>
+            TYPE : {{$user->type}}
             <br><br>
         @endforeach     
     </h4>
