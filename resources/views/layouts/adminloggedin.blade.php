@@ -1,8 +1,8 @@
 <html>
     <head>
         <h3>
-        <a href="{{route('user.dashboard')}}">DASHBOARD || </a>
-        <a href="{{route('user.details.all')}}">DETAILS</a>
+        <a href="{{route('admin.home')}}">DASHBOARD || </a>
+        <a href="{{route('admin.details')}}">DETAILS</a>
         </h3>
     </head>
     <body>

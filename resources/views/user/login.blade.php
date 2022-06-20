@@ -1,3 +1,4 @@
+<h3>{{Session::get('msg')}}</h3>
 @extends('layouts.top')
 @section('content')
     <h1>LOG IN</h1>

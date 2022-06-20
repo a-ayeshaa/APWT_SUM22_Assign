@@ -55,21 +55,27 @@ class UserController extends Controller
 
         $user=_user::where('email',$req->email)
                     ->where('password',$req->password)
-                    ->get();
-        if ($user->isEmpty())
+                    ->first();
+        
+        if($user)
         {
-            return redirect()->route('user.error');
-        }
-        else
-        {
-            if($user[0]->type=="User")
+            if($user->type=="User")
             {
+                session()->put('logged.user',$user->id);
                 return redirect()->route('user.dashboard');
             }
-            else if($user[0]->type=="Admin")
+            else if($user->type=="Admin")
             {
+                session()->put('logged.admin',$user->id);
                 return redirect()->route('admin.home');
             }
+        }
+
+        else
+        {
+            // return redirect()->route('user.error');
+            session()->flash('msg','User not valid');
+            return back();
         }
 
     }
@@ -85,23 +91,68 @@ class UserController extends Controller
         //return $users;
         return view('user.dashboard')->with('users',$users);
     }
+    
 
+    public function logout()
+    {
+        session()->forget('logged');
+        session()->flash('msg','Sucessfully Logged out');
+        return redirect()->route('user.login');
+    }
+
+    //DETAILS
     public function details($id)
     {
         $users=_user::where('id',$id)->get();
         return view('user.details')->with('users',$users);
     }
 
+
+    //ADMIN
+    public function delete($id)
+    {
+        $users=_user::where('id',$id)->delete();
+        $user=_user::all();
+        return view('admin.home')->with('users',$user);
+    }
+
     public function allDetails()
     {
         $users=_user::all();
         //var_dump($users);
-        return view('user.details')->with('users',$users);
+        return view('admin.alldetails')->with('users',$users);
     }
 
     public function adminHome()
     {
         $users = _user::all();
         return view('admin.home')->with('users',$users);
+    }
+
+    public function modify($id)
+    {
+        $user=_user::where('id',$id)->first();
+        return view('admin.modify')->with('user',$user);
+    }
+
+    public function modified($id,Request $req)
+    {
+        $id=$req->id;
+        $this->validate($req,
+        [
+            "name"=> "required|regex:/^[A-Za-z- .,]+$/i",
+            "password"=>"required|min:8|regex:/^.*(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$ %^&*~><.,:;]).*$/i",
+            "confirmPassword"=>"required|same:password",
+            "email"=>"required"
+        ]);
+
+        $modified = _user::where('id',$id)
+                            ->update(
+                                ['name'=>$req->name,
+                                 'email'=>$req->email,
+                                 'password'=>$req->password]
+                            );
+        $user=_user::where('id',$id)->first();
+        return view('admin.modified')->with('user',$user);
     }
 }
